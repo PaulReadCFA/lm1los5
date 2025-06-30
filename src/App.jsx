@@ -1,5 +1,7 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
+
+export default function LOS5ReturnLayers() {
 
 export default function LOS5ReturnLayers() {
   const [inflation, setInflation] = useState(2.1);
