@@ -7,7 +7,7 @@ import {
   Tooltip,
   Legend,
   LabelList,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from "recharts";
 
 export default function LOS5ReturnLayers() {
@@ -36,7 +36,6 @@ export default function LOS5ReturnLayers() {
     const t = taxRate / 100;
     const inf = inflation / 100;
 
-    // SME-corrected formulas
     const leveragedGross = g + d / (1 - d) * (g - bc);
     const leveragedNet = (g - e) + d / (1 - d) * ((g - e) - bc);
     const afterTax = leveragedNet * (1 - t);
@@ -60,12 +59,12 @@ export default function LOS5ReturnLayers() {
     const r = calculateReturns(asset);
     return {
       name: asset.name,
-      "Leveraged Gross": r.leveragedGross,
-      "Leveraged Net": r.leveragedNet,
-      "After-Tax": r.afterTax,
-      "After-Tax Real": r.afterTaxReal,
-      "Unleveraged Net": r.unleveragedNet,
-      "Risk Premium": r.riskPremium,
+      "Pre-Tax Nominal Gross Leveraged Return": r.leveragedGross,
+      "Pre-Tax Nominal Net Leveraged Return": r.leveragedNet,
+      "After-Tax Nominal Net Leveraged Return": r.afterTax,
+      "After-Tax Real Net Leveraged Return": r.afterTaxReal,
+      "After-Tax Real Net Unleveraged Return": r.unleveragedNet,
+      "After-Tax Net Risk Premium (Unleveraged)": r.riskPremium,
       "Expenses": r.expensesImpact,
     };
   });
@@ -113,19 +112,39 @@ export default function LOS5ReturnLayers() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div>
           <label>Inflation (%)</label>
-          <input type="number" value={inflation} onChange={(e) => setInflation(+e.target.value)} className="w-full border p-2 rounded" />
+          <input
+            type="number"
+            value={inflation}
+            onChange={(e) => setInflation(+e.target.value)}
+            className="w-full border p-2 rounded"
+          />
         </div>
         <div>
           <label>Tax Rate (%)</label>
-          <input type="number" value={taxRate} onChange={(e) => setTaxRate(+e.target.value)} className="w-full border p-2 rounded" />
+          <input
+            type="number"
+            value={taxRate}
+            onChange={(e) => setTaxRate(+e.target.value)}
+            className="w-full border p-2 rounded"
+          />
         </div>
         <div>
           <label>Borrowing Cost (%)</label>
-          <input type="number" value={borrowingCost} onChange={(e) => setBorrowingCost(+e.target.value)} className="w-full border p-2 rounded" />
+          <input
+            type="number"
+            value={borrowingCost}
+            onChange={(e) => setBorrowingCost(+e.target.value)}
+            className="w-full border p-2 rounded"
+          />
         </div>
         <div>
           <label>Percent Debt (%)</label>
-          <input type="number" value={percentDebt} onChange={(e) => setPercentDebt(+e.target.value)} className="w-full border p-2 rounded" />
+          <input
+            type="number"
+            value={percentDebt}
+            onChange={(e) => setPercentDebt(+e.target.value)}
+            className="w-full border p-2 rounded"
+          />
         </div>
       </div>
 
@@ -141,12 +160,12 @@ export default function LOS5ReturnLayers() {
             <Tooltip formatter={(value) => `${value.toFixed(2)}%`} />
             <Legend />
             {[
-              ["Leveraged Gross", "#C7D2FE"],
-              ["Leveraged Net", "#A5B4FC"],
-              ["After-Tax", "#93C5FD"],
-              ["After-Tax Real", "#60A5FA"],
-              ["Unleveraged Net", "#3B82F6"],
-              ["Risk Premium", "#2563EB"],
+              ["Pre-Tax Nominal Gross Leveraged Return", "#C7D2FE"],
+              ["Pre-Tax Nominal Net Leveraged Return", "#A5B4FC"],
+              ["After-Tax Nominal Net Leveraged Return", "#93C5FD"],
+              ["After-Tax Real Net Leveraged Return", "#60A5FA"],
+              ["After-Tax Real Net Unleveraged Return", "#3B82F6"],
+              ["After-Tax Net Risk Premium (Unleveraged)", "#2563EB"],
               ["Expenses", "#1D4ED8"],
             ].map(([key, color]) => (
               <Bar key={key} dataKey={key} fill={color}>
@@ -157,20 +176,20 @@ export default function LOS5ReturnLayers() {
         </ResponsiveContainer>
       </div>
 
-      {/* Optional: Remove if chart is self-explanatory */}
-      {/*
+      {/* Optional: uncomment to keep SME-aligned table */}
+      {/* 
       <div className="mb-10">
         <h2 className="text-lg font-semibold mb-2">Return Calculations</h2>
         <table className="w-full table-auto border text-sm">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-2 text-left">Asset</th>
-              <th className="p-2">Leveraged Gross</th>
-              <th className="p-2">Leveraged Net</th>
-              <th className="p-2">After-Tax</th>
-              <th className="p-2">After-Tax Real</th>
-              <th className="p-2">Unleveraged Net</th>
-              <th className="p-2">Risk Premium</th>
+              <th className="p-2">Pre-Tax Nominal Gross Leveraged Return</th>
+              <th className="p-2">Pre-Tax Nominal Net Leveraged Return</th>
+              <th className="p-2">After-Tax Nominal Net Leveraged Return</th>
+              <th className="p-2">After-Tax Real Net Leveraged Return</th>
+              <th className="p-2">After-Tax Real Net Unleveraged Return</th>
+              <th className="p-2">After-Tax Net Risk Premium (Unleveraged)</th>
             </tr>
           </thead>
           <tbody>
