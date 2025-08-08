@@ -29,22 +29,20 @@ export default function LOS5ReturnLayers() {
   };
 
   const calculateReturns = (asset) => {
-    const g = asset.grossReturn / 100;   // Pre-tax nominal gross return
-    const e = asset.expenses / 100;      // Expenses
-    const d = percentDebt / 100;         // Debt ratio
-    const bc = borrowingCost / 100;      // Borrowing cost
-    const t = taxRate / 100;             // Tax rate
-    const inf = inflation / 100;         // Inflation rate
-    const rf = assets[2].grossReturn / 100;  // Treasury bill rate (for risk premium)
+    const g = asset.grossReturn / 100;
+    const e = asset.expenses / 100;
+    const d = percentDebt / 100;
+    const bc = borrowingCost / 100;
+    const t = taxRate / 100;
+    const inf = inflation / 100;
+    const rf = assets[2].grossReturn / 100;
 
-    // SME-style formulas
     const leveragedGross = g + d / (1 - d) * (g - bc);
     const leveragedNet = (g - e) + d / (1 - d) * ((g - e) - bc);
     const afterTax = leveragedNet * (1 - t);
     const afterTaxReal = (1 + afterTax) / (1 + inf) - 1;
-    const unleveragedNominal = (g - e) * (1 - t);
-    const unleveragedReal = (1 + unleveragedNominal) / (1 + inf) - 1;
-    const riskPremium = unleveragedNominal / (1 + rf) - 1;
+    const unleveragedReal = (1 + ((g - e) * (1 - t))) / (1 + inf) - 1;
+    const riskPremium = ((g - e) * (1 - t)) / (1 + rf); // matches SME formula
 
     return {
       leveragedGross: leveragedGross * 100,
@@ -174,42 +172,6 @@ export default function LOS5ReturnLayers() {
           </BarChart>
         </ResponsiveContainer>
       </div>
-
-      {/* Optional: Uncomment if needed */}
-      {/* 
-      <div className="mb-10">
-        <h2 className="text-lg font-semibold mb-2">Return Calculations</h2>
-        <table className="w-full table-auto border text-sm">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-2 text-left">Asset</th>
-              <th className="p-2">Pre-Tax Nominal Gross Leveraged Return</th>
-              <th className="p-2">Pre-Tax Nominal Net Leveraged Return</th>
-              <th className="p-2">After-Tax Nominal Net Leveraged Return</th>
-              <th className="p-2">After-Tax Real Net Leveraged Return</th>
-              <th className="p-2">After-Tax Real Net Unleveraged Return</th>
-              <th className="p-2">After-Tax Net Risk Premium (Unleveraged)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {assets.map((asset) => {
-              const r = calculateReturns(asset);
-              return (
-                <tr key={asset.name} className="border-t">
-                  <td className="p-2 font-medium">{asset.name}</td>
-                  <td className="p-2">{r.leveragedGross.toFixed(2)}%</td>
-                  <td className="p-2">{r.leveragedNet.toFixed(2)}%</td>
-                  <td className="p-2">{r.afterTax.toFixed(2)}%</td>
-                  <td className="p-2">{r.afterTaxReal.toFixed(2)}%</td>
-                  <td className="p-2">{r.unleveragedReal.toFixed(2)}%</td>
-                  <td className="p-2">{r.riskPremium.toFixed(2)}%</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-      */}
     </div>
   );
 }
