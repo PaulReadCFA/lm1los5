@@ -12,14 +12,14 @@ import {
 
 export default function LOS5ReturnLayers() {
   const [inflation, setInflation] = useState(2.1);
-  const [taxRate, setTaxRate] = useState(20);
-  const [borrowingCost, setBorrowingCost] = useState(4);
-  const [percentDebt, setPercentDebt] = useState(20);
+  const [taxRate, setTaxRate] = useState(25);
+  const [borrowingCost, setBorrowingCost] = useState(5);
+  const [percentDebt, setPercentDebt] = useState(30);
 
   const [assets, setAssets] = useState([
-    { name: "Equities", grossReturn: 8.0, expenses: 0.5 },
-    { name: "Corporate Bonds", grossReturn: 6.5, expenses: 0.3 },
-    { name: "Treasury Bills", grossReturn: 2.5, expenses: 0.0 },
+    { name: "Equities", grossReturn: 10.0, expenses: 0.6 },
+    { name: "Corporate Bonds", grossReturn: 7.2, expenses: 0.4 },
+    { name: "Treasury Bills", grossReturn: 3.0, expenses: 0.0 },
   ]);
 
   const handleAssetChange = (index, field, value) => {
@@ -29,29 +29,30 @@ export default function LOS5ReturnLayers() {
   };
 
   const calculateReturns = (asset) => {
-    const e = asset.expenses / 100;
-    const g = asset.grossReturn / 100;
-    const d = percentDebt / 100;
-    const bc = borrowingCost / 100;
-    const t = taxRate / 100;
-    const inf = inflation / 100;
+    const g = asset.grossReturn / 100;   // Pre-tax nominal gross return
+    const e = asset.expenses / 100;      // Expenses
+    const d = percentDebt / 100;         // Debt ratio
+    const bc = borrowingCost / 100;      // Borrowing cost
+    const t = taxRate / 100;             // Tax rate
+    const inf = inflation / 100;         // Inflation rate
+    const rf = assets[2].grossReturn / 100;  // Treasury bill rate (for risk premium)
 
+    // SME-style formulas
     const leveragedGross = g + d / (1 - d) * (g - bc);
     const leveragedNet = (g - e) + d / (1 - d) * ((g - e) - bc);
     const afterTax = leveragedNet * (1 - t);
     const afterTaxReal = (1 + afterTax) / (1 + inf) - 1;
-    const unleveragedNet = (g - e) * (1 - t);
-    const riskFree = assets[2].grossReturn / 100;
-    const riskPremium = (1 + unleveragedNet) / (1 + riskFree) - 1;
+    const unleveragedNominal = (g - e) * (1 - t);
+    const unleveragedReal = (1 + unleveragedNominal) / (1 + inf) - 1;
+    const riskPremium = unleveragedNominal / (1 + rf) - 1;
 
     return {
       leveragedGross: leveragedGross * 100,
       leveragedNet: leveragedNet * 100,
       afterTax: afterTax * 100,
       afterTaxReal: afterTaxReal * 100,
-      unleveragedNet: unleveragedNet * 100,
+      unleveragedReal: unleveragedReal * 100,
       riskPremium: riskPremium * 100,
-      expensesImpact: e * 100,
     };
   };
 
@@ -63,9 +64,8 @@ export default function LOS5ReturnLayers() {
       "Pre-Tax Nominal Net Leveraged Return": r.leveragedNet,
       "After-Tax Nominal Net Leveraged Return": r.afterTax,
       "After-Tax Real Net Leveraged Return": r.afterTaxReal,
-      "After-Tax Real Net Unleveraged Return": r.unleveragedNet,
+      "After-Tax Real Net Unleveraged Return": r.unleveragedReal,
       "After-Tax Net Risk Premium (Unleveraged)": r.riskPremium,
-      "Expenses": r.expensesImpact,
     };
   });
 
@@ -166,7 +166,6 @@ export default function LOS5ReturnLayers() {
               ["After-Tax Real Net Leveraged Return", "#60A5FA"],
               ["After-Tax Real Net Unleveraged Return", "#3B82F6"],
               ["After-Tax Net Risk Premium (Unleveraged)", "#2563EB"],
-              ["Expenses", "#1D4ED8"],
             ].map(([key, color]) => (
               <Bar key={key} dataKey={key} fill={color}>
                 <LabelList dataKey={key} position="top" formatter={(v) => `${v.toFixed(1)}%`} />
@@ -176,7 +175,7 @@ export default function LOS5ReturnLayers() {
         </ResponsiveContainer>
       </div>
 
-      {/* Optional: uncomment to keep SME-aligned table */}
+      {/* Optional: Uncomment if needed */}
       {/* 
       <div className="mb-10">
         <h2 className="text-lg font-semibold mb-2">Return Calculations</h2>
@@ -202,7 +201,7 @@ export default function LOS5ReturnLayers() {
                   <td className="p-2">{r.leveragedNet.toFixed(2)}%</td>
                   <td className="p-2">{r.afterTax.toFixed(2)}%</td>
                   <td className="p-2">{r.afterTaxReal.toFixed(2)}%</td>
-                  <td className="p-2">{r.unleveragedNet.toFixed(2)}%</td>
+                  <td className="p-2">{r.unleveragedReal.toFixed(2)}%</td>
                   <td className="p-2">{r.riskPremium.toFixed(2)}%</td>
                 </tr>
               );
